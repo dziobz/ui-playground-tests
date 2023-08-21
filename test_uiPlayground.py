@@ -64,3 +64,108 @@ def test_client_side_delay(page: Page):
     data = page.locator("p.bg-success")
     data.wait_for()
     expect(data).to_have_text("Data calculated on the client side.")
+
+
+def test_click(page: Page):
+    page.goto("http://uitestingplayground.com/click")
+    button = page.get_by_role("button", name="Button That Ignores DOM Click Event")
+    button.click()
+    expect(button).to_have_class("btn btn-success")
+    print("\nButton is not clickable/is not reacting anymore")
+
+
+def test_text_input(page: Page):
+    page.goto("http://uitestingplayground.com/textinput")
+    button = page.locator("#updatingButton")
+    input = page.get_by_label("Set New Button Name")
+    input.fill("Python")
+    button.click()
+    expect(button).to_have_text("Python")
+
+
+def test_scrollbars(page: Page):
+    page.goto("http://uitestingplayground.com/scrollbars")
+    button = page.locator("#hidingButton")
+    button.scroll_into_view_if_needed()
+    button.click()
+    # only .click works as well, it scrolls automatically to the element
+
+
+def test_dynamic_table(page: Page):
+    page.goto("http://uitestingplayground.com/dynamictable")
+    label = page.locator("p.bg-warning").inner_text()
+    label_percentage = label.split()[-1] # Get percentage number from the label
+    
+    ### First method
+    """ 
+    percentage = label.split()[-1]
+    column_headers = page.get_by_role("columnheader")
+    cpu_column = None
+
+    for index in range(column_headers.count()):
+        column_header = column_headers.nth(index)
+
+        if column_header.inner_text() == "CPU":
+            cpu_column = index
+            break
+    assert cpu_column != None
+
+    rowgroup = page.get_by_role("rowgroup").last
+    chrome_row = rowgroup.get_by_role("row").filter(has_text='Chrome')
+
+    chrome_cpu =chrome_row.get_by_role("cell").nth(cpu_column)
+    expect(chrome_cpu).to_have_text(percentage) """
+
+    ### Second mehthod
+    rowgroup = page.get_by_role("rowgroup")
+    chrome_row = rowgroup.get_by_role("row", name="Chrome").inner_text().split()
+    
+    table_percentage = [e for e in chrome_row if "%" in e][0]
+    print(label_percentage, table_percentage)
+    assert table_percentage == label_percentage
+
+
+def test_verify_text(page: Page):
+    page.goto('http://uitestingplayground.com/verifytext')
+    text = page.locator("div.bg-primary").get_by_text("Welcome", exact=False)
+    expect(text).to_have_text("Welcome UserName!") 
+    text.dblclick()
+
+
+def test_progress_bar(page: Page):
+    page.goto("http://uitestingplayground.com/progressbar")
+    start_btn = page.get_by_role("button", name="Start")
+    stop_btn = page.get_by_role("button", name="Stop")
+    progress = page.get_by_role("progressbar")
+    start_btn.click()
+
+    while True:
+        valuenow = int(progress.get_attribute("aria-valuenow"))
+        
+        if valuenow >=75:
+            break
+
+    stop_btn.click()
+    assert valuenow >= 75
+    
+
+def test_visibility(page: Page):
+    page.goto("http://uitestingplayground.com/visibility")
+    hide_btn = page.get_by_role("button", name="Hide")
+    removed_btn = page.get_by_role("button", name="Removed")
+    zero_width_btn = page.get_by_role("button", name="Zero Width")
+    overlapped_btn = page.get_by_role("button", name="Overlapped")
+    opacity0_btn = page.get_by_role("button", name="Opacity 0")
+    visibility_hidden_btn = page.get_by_role("button", name="Visibility Hidden")
+    display_none_btn = page.get_by_role("button", name="Display None")
+    offscreen_btn = page.get_by_role("button", name="Offscreen")
+
+    hide_btn.click()
+    expect(removed_btn).not_to_be_visible()
+    expect(zero_width_btn).to_have_css("width", "0px")
+    with pytest.raises(TimeoutError):
+        overlapped_btn.click(timeout=1500)
+    expect(opacity0_btn).to_have_css("opacity", "0")
+    expect(visibility_hidden_btn).to_be_hidden()
+    expect(display_none_btn).to_be_hidden()
+    expect(offscreen_btn).not_to_be_in_viewport()
