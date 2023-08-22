@@ -169,3 +169,50 @@ def test_visibility(page: Page):
     expect(visibility_hidden_btn).to_be_hidden()
     expect(display_none_btn).to_be_hidden()
     expect(offscreen_btn).not_to_be_in_viewport()
+
+
+def test_sample_app(page: Page):
+    page.goto("http://uitestingplayground.com/sampleapp")
+    label = page.locator("#loginstatus")
+    username = "TestLogin"
+    password = "pwd"
+    username_input = page.get_by_placeholder("User Name")
+    password_input = page.get_by_placeholder("********")
+    button = page.locator("#login.btn.btn-primary")
+
+    username_input.fill(username)
+    password_input.fill(password)
+    button.click()
+    expect(label).to_have_text(f"Welcome, {username}!")
+
+
+def test_mouseover(page: Page):
+    page.goto("http://uitestingplayground.com/mouseover")
+    clickme = page.get_by_text("Click me")
+    clickcount = page.locator("#clickCount")
+    clickme.hover()
+    activelink = page.get_by_title("Active Link")
+    activelink.click(click_count=2)
+    expect(clickcount).to_have_text("2")
+
+
+def test_nbsp(page: Page):
+    page.goto("http://uitestingplayground.com/nbsp")
+    button = page.locator("//button[text()='My\u00a0Button']")
+    button.click()
+
+
+def test_overlapped_element(page: Page):
+    page.goto("http://uitestingplayground.com/overlapped")
+    input = page.locator("input#name")
+
+    div = input.locator("..") # <-- Selects div parent element 
+    div.hover()
+
+    page.mouse.wheel(0, 200) # Scroll horizontally 200px
+
+    input.fill("Python")
+    expect(input).to_have_value("Python")
+
+    
+
