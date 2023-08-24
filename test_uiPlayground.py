@@ -204,15 +204,17 @@ def test_nbsp(page: Page):
 
 def test_overlapped_element(page: Page):
     page.goto("http://uitestingplayground.com/overlapped")
-    input = page.locator("input#name")
+    input = page.get_by_placeholder("Name")
 
     div = input.locator("..") # <-- Selects div parent element 
     div.hover()
 
     page.mouse.wheel(0, 200) # Scroll horizontally 200px
-
-    input.fill("Python")
-    expect(input).to_have_value("Python")
+    
+    page.wait_for_timeout(100)
+    data = "python"
+    input.fill(data)
+    expect(input).to_have_value(data)
 
     
 
