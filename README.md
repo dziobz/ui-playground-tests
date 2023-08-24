@@ -13,6 +13,7 @@ This repository was created to showcase usage of Playwright with Python in order
 * Pip
 * Playwright
 * Pytest
+* Pytest-Playwright
 
 
 ## Installation
@@ -23,6 +24,10 @@ Create virtual environment with ```python -m venv venv``` and activate it with `
 
 ```bash
     pip install playwright
+```
+
+```bash
+    pip install pytest
 ```
 
 
